@@ -17,14 +17,14 @@ y escribir uno a uno, siempre a mano. Nada de envíos masivos ni automáticos.
 ## Mensaje uno a uno de primer contacto (WhatsApp)
 Personalizar los corchetes con lo que se vio en su ficha. Enviarlo a mano, de una persona a otra.
 
-> Hola, [NOMBRE], soy Jorge. Vi [RESTAURANTE] en Google Maps: [DETALLE CONCRETO, p. ej. "las reseñas de su mole son excelentes"].
+> Hola, [NOMBRE], soy Jorge. Vi [RESTAURANTE] en Google Maps: [DETALLE CONCRETO, p. ej. "las reseñas de tu mole son excelentes"].
 > También vi que varias personas comentan que el fin de semana [DOLOR CONCRETO, p. ej. "es difícil conseguir mesa sin llamar"].
 >
-> Hice una demo para restaurantes como el suyo: sus clientes reservan en línea en 20 segundos, el sistema asigna la mesa
-> sin dobles reservas y, si alguien no llega, libera la mesa y sienta a quien está esperando. ¿Le puedo mandar un video de
-> un minuto para que lo vea? Si no le interesa, me lo dice y no le vuelvo a escribir.
+> Hice una demo para restaurantes como el tuyo: tus clientes reservan en línea en 20 segundos, el sistema asigna la mesa
+> sin dobles reservas y, si alguien no llega, libera la mesa y sienta a quien está esperando. ¿Te mando un video de un minuto
+> para que lo veas? Si no te interesa, me dices y no te vuelvo a escribir.
 
-Notas: usar "usted" en el primer contacto y pasar a tuteo solo si el cliente lo hace; sin precios en el primer mensaje;
+Notas: tuteo neutro, sin voseo ni modismos; sin precios en el primer mensaje;
 un solo seguimiento a los 5 días como máximo; respetar a quien diga que no y anotarlo para no volver a escribir.
 
 ## Guion de demo de 60 segundos
