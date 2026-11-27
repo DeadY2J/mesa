@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-papel: #f6f1e7;
+  --color-crema: #fbf8f2;
+  --color-tinta: #211a14;
+  --color-tinta-suave: #66584b;
+  --color-borde: #e2d6c2;
+  --color-achiote: #a9461f;
+  --color-achiote-claro: #f6dfd3;
+  --color-maiz: #8a5a0a;
+  --color-maiz-claro: #f7e8c6;
+  --color-nopal: #3b6a48;
+  --color-nopal-claro: #dcebdc;
+  --color-pizarra: #4f606c;
+  --color-pizarra-claro: #e3e9ee;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html { background: var(--color-papel); color: var(--color-tinta); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, .serif { font-family: var(--font-serif); font-variation-settings: "opsz" 72; }
+.cifra { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid var(--color-achiote); outline-offset: 2px; border-radius: 6px; }
+
+/* Piso del salón: baldosa sutil. */
+.piso {
+  background-color: var(--color-crema);
+  background-image: linear-gradient(rgb(33 26 20 / 0.045) 1px, transparent 1px), linear-gradient(90deg, rgb(33 26 20 / 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* El único momento animado: la mesa que acaba de cambiar se enciende. */
+@keyframes encender {
+  0% { box-shadow: 0 0 0 0 rgb(169 70 31 / 0.6); transform: scale(1.06); }
+  60% { box-shadow: 0 0 0 14px rgb(169 70 31 / 0); transform: scale(1); }
+  100% { box-shadow: 0 0 0 0 rgb(169 70 31 / 0); }
+}
+.enciende { animation: encender 1.4s ease-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .enciende { animation: none; outline: 3px solid var(--color-achiote); }
+}
