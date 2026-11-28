@@ -2,6 +2,13 @@
 
 Actualizado: 27/11/2026.
 
+## Test de humo con Playwright (28/11/2026)
+- `npm run test:e2e` compila, arranca la app en modo demo y recorre en Chromium: portada con CSP y las 12 mesas,
+  sentar una mesa desde su ficha, reserva desde el teléfono, móvil sin desbordamiento y modo presentación.
+  Falla si hay cualquier error de consola. También corre en la CI (trabajo `humo`).
+- Encontró y corrigió un fallo real: el patrón del teléfono no era una expresión válida con el modo `v` de los
+  navegadores actuales, así que la validación se ignoraba en silencio.
+
 ## Modo presentación (28/11/2026)
 - Botón "Ver la demo" en la cabecera (solo en modo demo): reinicia la sala y ejecuta solo el guion de 60 s de
   PROSPECCION.md con subtítulos grandes para grabar el vídeo: el teléfono se rellena y reserva para 2 a las 21:15,

@@ -686,7 +686,7 @@ function ReservaCliente({ cambio, alReservar, orden }: { cambio: number; alReser
                 </label>
                 <label className="block text-sm">
                   <span className="font-semibold">Teléfono (WhatsApp)</span>
-                  <input required type="tel" pattern="\+?[\d\s()\-]{7,20}" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+52 55 1234 5678" className={campo} autoComplete="tel" />
+                  <input required type="tel" pattern="\+?[\d\s\(\)\-]{7,20}" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+52 55 1234 5678" className={campo} autoComplete="tel" />
                 </label>
                 <label className="block text-sm">
                   <span className="font-semibold">Algo que debamos saber</span> <span className="text-tinta-suave">(opcional)</span>
