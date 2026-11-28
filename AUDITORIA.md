@@ -19,7 +19,7 @@ Quedan puntos medios y bajos documentados abajo; ninguno bloquea la demo.
 | S3 | Media | En modo demo (sin `MESA_TOKEN`) el panel es público: cualquiera puede ver los datos ficticios y tocar la sala. | Aceptado: son datos ficticios. **No desplegar con datos reales sin `MESA_TOKEN`.** |
 | S4 | Media | El límite de peticiones usa `x-forwarded-for`, que un atacante puede falsear fuera de un proxy de confianza (Vercel lo sobrescribe). Además es en memoria, por instancia. | Abierto: en producción, límite compartido (Upstash/Redis) y IP del proxy. Verificado: la petición 11 a `/api/reservas` en un minuto devuelve 429. |
 | S5 | Media | Reservas en línea sin verificación del teléfono: alguien podría llenar el salón con reservas falsas (dentro del límite de 10/min por IP). | Abierto (fase 2): confirmación por WhatsApp con el módulo de Recepción 24/7 y captcha o anticipo en fechas de alta demanda. |
-| S6 | Media | CSP completa (`script-src`/`style-src`) sin aplicar: Next.js necesita nonces para scripts en línea. | Abierto, igual que en Recepción 24/7. |
+| S6 | Media | CSP completa (`script-src`/`style-src`) sin aplicar: Next.js necesita nonces para scripts en línea. | **Corregido (28/11/2026)**: CSP completa con nonce por petición en `src/proxy.ts` (ver sección de revisión). |
 | S7 | Baja | La clave del personal se guarda en `sessionStorage` del navegador. | Aceptado para el MVP; con Supabase se sustituye por inicio de sesión con cookie `httpOnly`. |
 | S8 | Baja | Estado en memoria sin tope de reservas: mitigado por el límite de peticiones y por los topes del motor (mesas, llegadas por intervalo). | Se resuelve al pasar a Supabase. |
 
@@ -48,4 +48,35 @@ Comprobado sin hallazgos:
 1. Supabase con RLS por restaurante y restricción de exclusión para que dos reservas no tomen la misma mesa a la vez (S8 y concurrencia).
 2. Inicio de sesión del personal con cookie `httpOnly` (S2, S7).
 3. Límite de peticiones compartido (S4) y confirmación por WhatsApp (S5).
-4. CSP con nonces (S6), Lighthouse/axe y prueba en móvil real.
+4. Lighthouse en Vercel y prueba en móvil real (CSP con nonces y axe hechos el 28/11/2026).
+
+## Revisión del 28/11/2026 (fase 4 completa)
+
+Pasada de auditoría sobre `main` de las seis apps de la Fábrica, en la nube. Resultado: **sin críticos, altos ni medios
+abiertos que se puedan corregir sin cuentas reales**. Lo que depende de cuentas reales queda pendiente y no se da por bueno.
+
+Corregido en esta pasada:
+- **CSP completa** (S6): `src/proxy.ts` genera un nonce por petición y aplica `default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'`
+  (sin `unsafe-inline` ni `unsafe-eval` en producción), `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`
+  y `upgrade-insecure-requests`. `style-src` mantiene `'unsafe-inline'` porque React usa atributos `style` (riesgo bajo). Las páginas
+  pasan a render dinámico (`connection()` en el layout) para que el nonce sea nuevo en cada visita. Las rutas API llevan
+  `frame-ancestors 'none'; object-src 'none'; base-uri 'none'`. Política en `src/*/csp.ts` con test (`tests/csp.test.ts`).
+- Contraste: las etiquetas de 10 px de las mesas (nombre del cliente, plazas) tenían opacidad 80 % y no llegaban a 4,5:1 (axe: 12 nodos, «serious»). Ahora 11 px, sin opacidad y en negrita media: axe sin incidencias.
+
+Comprobado (todo contra `next build` + `next start`, Chromium sin cabeza):
+
+| Comprobación | Resultado |
+|---|---|
+| Typecheck · tests · build | OK · 57 tests en verde · OK |
+| `npm audit` | 0 vulnerabilidades |
+| CSP en navegador | Cabecera con nonce en la página; scripts de Next con nonce; React hidrata y responde a clics; 0 errores en consola |
+| Accesibilidad (axe-core 4.10, WCAG 2 A/AA, vista inicial) | 0 incidencias |
+| Móvil (375 px) | Sin desbordamiento horizontal |
+| Rendimiento (Pixel 5 emulado, CPU ×4, red lenta) | LCP 0,7 s · CLS 0 · TTFB ≈ 150 ms (local) |
+| Voseo y modismos | Ninguno fuera de los tests de modismos y de los patrones que sirven para entender al usuario |
+| Documentos de la Fábrica | ALCANCE, AUDITORIA, PRESUPUESTO (marcadores `[TARIFA_HORA_USD]` y `[CUOTA_MENSUAL_USD]` sin rellenar), PROSPECCION y STATUS presentes |
+
+Límites honestos de esta pasada: axe solo cubre la vista inicial (no todos los estados), el rendimiento se midió en local
+(no en Vercel ni con Lighthouse) y no hubo prueba en móviles físicos.
+
+**Pendiente que no se puede dar por bueno sin cuentas reales:** Supabase, inicio de sesión del personal y confirmación por WhatsApp con cuenta real.

@@ -2,6 +2,13 @@
 
 Actualizado: 27/11/2026.
 
+## Revisión del 28/11/2026 (auditoría fase 4)
+- CSP completa con nonce por petición (`src/proxy.ts`), verificada en navegador sin errores.
+- Contraste de las etiquetas pequeñas de las mesas corregido (axe sin incidencias).
+- Typecheck, 57 tests, build y `npm audit` (0 vulnerabilidades) en verde; axe sin incidencias en la vista inicial; sin desbordamiento a 375 px.
+- Pendiente con cuentas reales (no se da por bueno): Supabase, inicio de sesión del personal y confirmación por WhatsApp con cuenta real.
+- Detalle en `AUDITORIA.md`. No desplegado.
+
 ## Hecho (MVP en modo demo)
 - Motor puro con tests: disponibilidad, asignación de mesa por mejor ajuste y uniones, margen de limpieza,
   tope de llegadas por intervalo, ciclo de vida de la reserva, ausencias automáticas, sin reserva y lista de espera
@@ -16,7 +23,7 @@ Actualizado: 27/11/2026.
 - Supabase (persistencia, RLS, restricción de exclusión por mesa) e inicio de sesión del personal.
 - Fase 2: recordatorio y confirmación por WhatsApp, anticipo con Mercado Pago para grupos, menú QR con asistente IA,
   pantalla de cocina, dividir la cuenta, editor visual del plano.
-- Medir con Lighthouse/axe y probar en un móvil real. Grabar el vídeo.
+- Lighthouse en Vercel y prueba en un móvil real (axe ya hecho). Grabar el vídeo.
 - Sin desplegar (no se pidió).
 
 ## Cómo probarlo

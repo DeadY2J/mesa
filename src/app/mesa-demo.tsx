@@ -415,7 +415,7 @@ function Plano({ vista, seleccion, alElegir }: { vista: VistaSala; seleccion?: s
                 } ${seleccion === m.id ? "ring-2 ring-tinta ring-offset-2 ring-offset-crema" : ""} ${enciende ? "enciende" : ""}`}
               >
                 <span className="serif text-base font-semibold">{m.nombre}</span>
-                <span className="text-[10px] opacity-80">{m.estado === "libre" ? (m.proxima ? `reserva ${m.proxima.split(" ·")[0]}` : `${m.capacidad} plazas`) : m.detalle.split(" · ")[0]}</span>
+                <span className="text-[11px] font-medium">{m.estado === "libre" ? (m.proxima ? `reserva ${m.proxima.split(" ·")[0]}` : `${m.capacidad} plazas`) : m.detalle.split(" · ")[0]}</span>
               </button>
             );
           })}
