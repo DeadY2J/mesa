@@ -2,6 +2,17 @@
 
 Actualizado: 27/11/2026.
 
+## Rediseño visual del 28/11/2026
+- Identidad propia: un comedor de noche visto desde arriba. Fondo vino oscuro, manteles de lino, mesas libres en oliva,
+  ocupadas en vino y las que esperan a sus clientes en latón. Tipografías Young Serif (rótulos, horas y números de mesa)
+  e Instrument Sans (texto), alojadas en el proyecto.
+- El plano es la interfaz principal: cada mesa se dibuja con sus sillas (las ocupadas se rellenan con las personas reales,
+  repartidas en las mesas unidas), terraza con macetas, barra y entrada. Al tocar una mesa aparece su ficha con la acción
+  principal ("Ya llegaron, sentar" o "Pagaron, liberar mesa"). La mesa que cambia se enciende como una vela.
+- La reserva del cliente se ve dentro de un teléfono junto al plano; libro de reservas del día en papel de carta.
+- Responsive sin desbordamiento a 390 px, foco visible en latón, `prefers-reduced-motion` respetado, axe sin incidencias
+  (escritorio y móvil). 59 tests, typecheck y build en verde.
+
 ## Revisión del 28/11/2026 (auditoría fase 4)
 - CSP completa con nonce por petición (`src/proxy.ts`), verificada en navegador sin errores.
 - Contraste de las etiquetas pequeñas de las mesas corregido (axe sin incidencias).

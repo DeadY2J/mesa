@@ -1,45 +1,90 @@
 @import "tailwindcss";
 
+/*
+ * Mesa · La Ceiba. Un comedor de noche visto desde arriba:
+ * suelo de madera oscura teñida de vino, manteles de lino, mesas libres en oliva,
+ * ocupadas en vino y las que esperan a sus clientes marcadas en latón.
+ */
 @theme {
-  --color-papel: #f6f1e7;
-  --color-crema: #fbf8f2;
-  --color-tinta: #211a14;
-  --color-tinta-suave: #66584b;
-  --color-borde: #e2d6c2;
-  --color-achiote: #a9461f;
-  --color-achiote-claro: #f6dfd3;
-  --color-maiz: #8a5a0a;
-  --color-maiz-claro: #f7e8c6;
-  --color-nopal: #3b6a48;
-  --color-nopal-claro: #dcebdc;
-  --color-pizarra: #4f606c;
-  --color-pizarra-claro: #e3e9ee;
-  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-noche: #2a1118;      /* fondo: el comedor con la luz baja */
+  --color-noche-2: #3a1a22;    /* suelo del salón */
+  --color-noche-3: #4c2630;    /* líneas y bordes sobre el fondo */
+  --color-vino: #7a2235;       /* mesa ocupada */
+  --color-vino-vivo: #a3344b;
+  --color-oliva: #6e7a3a;      /* mesa libre */
+  --color-oliva-osc: #4a5522;  /* texto oliva sobre lino */
+  --color-oliva-clara: #d9ddb8;
+  --color-laton: #d3a24a;      /* llega pronto, foco y selección */
+  --color-laton-osc: #8a6420;
+  --color-lino: #f3eee5;       /* manteles y papel de la carta */
+  --color-lino-2: #e4dccd;
+  --color-piedra: #cfc6bb;     /* limpiando */
+  --color-tinta: #2a1118;
+  --color-tinta-suave: #6b5157;
+  --color-madera: #6a4330;
+  --font-rotulo: var(--font-rotulo), ui-serif, Georgia, serif;
+  --font-sans: var(--font-texto), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
 }
 
-html { background: var(--color-papel); color: var(--color-tinta); }
+@layer base {
+html { background: var(--color-noche); color: var(--color-lino); }
 body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-h1, h2, h3, .serif { font-family: var(--font-serif); font-variation-settings: "opsz" 72; }
+h1, h2, h3, .rotulo { font-family: var(--font-rotulo); font-weight: 400; letter-spacing: -0.005em; }
 .cifra { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
 
-:focus-visible { outline: 2px solid var(--color-achiote); outline-offset: 2px; border-radius: 6px; }
-
-/* Piso del salón: baldosa sutil. */
-.piso {
-  background-color: var(--color-crema);
-  background-image: linear-gradient(rgb(33 26 20 / 0.045) 1px, transparent 1px), linear-gradient(90deg, rgb(33 26 20 / 0.045) 1px, transparent 1px);
-  background-size: 28px 28px;
+:focus-visible { outline: 3px solid var(--color-laton); outline-offset: 2px; }
 }
 
-/* El único momento animado: la mesa que acaba de cambiar se enciende. */
-@keyframes encender {
-  0% { box-shadow: 0 0 0 0 rgb(169 70 31 / 0.6); transform: scale(1.06); }
-  60% { box-shadow: 0 0 0 14px rgb(169 70 31 / 0); transform: scale(1); }
-  100% { box-shadow: 0 0 0 0 rgb(169 70 31 / 0); }
+@layer components {
+/* Suelo: tablones de madera, muy sutiles. */
+.suelo {
+  container-type: inline-size;
+  background-color: var(--color-noche-2);
+  background-image:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 170px);
 }
-.enciende { animation: encender 1.4s ease-out 2; }
+
+/* Terraza: losetas y macetas de olivo en el borde. */
+.terraza {
+  background-color: rgb(110 122 58 / 0.16);
+  background-image: linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.macetas { background-image: radial-gradient(circle, var(--color-oliva) 0 45%, transparent 48%); background-size: 100% 11%; }
+
+.barra { background: linear-gradient(180deg, #7b5039, var(--color-madera) 40%, #4f3022); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18); }
+
+/* Mantel de cada mesa según su estado. */
+.mantel { transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease; }
+.mantel-libre { background: var(--color-oliva-clara); border: 2px solid var(--color-oliva); color: var(--color-oliva-osc); }
+.mantel-ocupada { background: var(--color-vino); border: 2px solid var(--color-vino-vivo); color: var(--color-lino); }
+.mantel-llega_pronto { background: var(--color-lino); border: 3px dashed var(--color-laton); color: var(--color-tinta); }
+.mantel-limpiando {
+  background: repeating-linear-gradient(135deg, var(--color-piedra) 0 6px, #bdb3a7 6px 12px);
+  border: 2px solid #9d9286; color: var(--color-tinta);
+}
+.silla { transition: background-color 0.35s ease, border-color 0.35s ease; }
+.silla-libre { border: 2px solid var(--color-oliva); background: transparent; }
+.silla-ocupada { border: 2px solid var(--color-vino-vivo); background: var(--color-lino); }
+.silla-llega_pronto { border: 2px dashed var(--color-laton); background: transparent; }
+.silla-limpiando { border: 2px solid #9d9286; background: transparent; }
+
+.num-mesa { font-size: max(13px, 3.1cqi); line-height: 1; }
+.det-mesa { font-size: max(10px, 1.25cqi); }
+@container (max-width: 620px) { .det-mesa { display: none; } }
+
+}
+
+/* El único momento animado: la mesa que acaba de cambiar se enciende como una vela. */
+@keyframes vela {
+  0% { box-shadow: 0 0 0 0 rgb(211 162 74 / 0.85); transform: scale(1.08); }
+  70% { box-shadow: 0 0 0 18px rgb(211 162 74 / 0); transform: scale(1); }
+  100% { box-shadow: 0 0 0 0 rgb(211 162 74 / 0); }
+}
+.enciende .mantel { animation: vela 1.3s ease-out 2; }
 
 @media (prefers-reduced-motion: reduce) {
-  .enciende { animation: none; outline: 3px solid var(--color-achiote); }
+  .enciende .mantel { animation: none; outline: 3px solid var(--color-laton); outline-offset: 3px; }
+  .mantel, .silla { transition: none; }
 }
