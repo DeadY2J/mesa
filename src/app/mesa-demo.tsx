@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RESERVA_GUION, subtituloEn } from "@/mesa/guion";
 import type { VistaReservaCliente, VistaSala } from "@/mesa/vista";
+import { BarraPresentacion, type OrdenGuion, usePresentacion } from "./presentacion";
 
 type Disponibilidad = {
   ahora: { fecha: string; hora: string };
@@ -47,8 +49,25 @@ export function MesaDemo() {
   const [contador, setContador] = useState(0);
   const refrescar = useCallback(() => setContador((n) => n + 1), []);
 
+  // Modo presentación: cada momento del guion se entrega como una orden a la sala y al teléfono.
+  const [orden, setOrden] = useState<OrdenGuion>();
+  const [ejecucion, setEjecucion] = useState(0);
+  const presentacion = usePresentacion((momento) => {
+    if (momento.tipo === "reiniciar") setEjecucion((n) => n + 1);
+    setOrden((o) => ({ n: (o?.n ?? 0) + 1, momento }));
+  });
+  const vistaGuion = presentacion.activo ? subtituloEn(presentacion.segundos).vista : undefined;
+  useEffect(() => {
+    if (vistaGuion) setPestana(vistaGuion);
+  }, [vistaGuion]);
+  const reiniciarTodo = () => {
+    presentacion.detener();
+    setEjecucion((n) => n + 1);
+    setOrden((o) => ({ n: (o?.n ?? 0) + 1, momento: { t: 0, tipo: "reiniciar" } }));
+  };
+
   return (
-    <main className="mx-auto max-w-[1520px] px-4 pb-10 pt-5 lg:px-6">
+    <main className={`mx-auto max-w-[1520px] px-4 pt-5 lg:px-6 ${presentacion.activo ? "pb-44" : "pb-10"}`}>
       <div role="tablist" aria-label="Vista" className="mb-4 grid grid-cols-2 rounded-full border border-noche-3 p-1 xl:hidden">
         {(["sala", "cliente"] as const).map((p) => (
           <button
@@ -65,12 +84,22 @@ export function MesaDemo() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className={`min-w-0 ${pestana === "sala" ? "" : "hidden xl:block"}`} aria-label="Sala en vivo">
-          <Sala cambioExterno={contador} />
+          <Sala cambioExterno={contador} orden={orden} alPresentar={presentacion.activo ? undefined : presentacion.empezar} />
         </section>
         <section className={`min-w-0 ${pestana === "cliente" ? "" : "hidden xl:block"}`} aria-label="Reserva en línea">
-          <ReservaCliente cambio={contador} alReservar={refrescar} />
+          <ReservaCliente key={ejecucion} cambio={contador} alReservar={refrescar} orden={orden} />
         </section>
       </div>
+
+      {presentacion.activo && (
+        <BarraPresentacion
+          segundos={presentacion.segundos}
+          terminado={presentacion.terminado}
+          alRepetir={presentacion.empezar}
+          alReiniciar={reiniciarTodo}
+          alCerrar={presentacion.detener}
+        />
+      )}
     </main>
   );
 }
@@ -79,12 +108,13 @@ export function MesaDemo() {
 // Sala en vivo (personal)
 // ---------------------------------------------------------------------------
 
-function Sala({ cambioExterno }: { cambioExterno: number }) {
+function Sala({ cambioExterno, orden, alPresentar }: { cambioExterno: number; orden?: OrdenGuion; alPresentar?: () => void }) {
   const [vista, setVista] = useState<VistaSala>();
   const [clave, setClave] = useState<string>();
   const [pideClave, setPideClave] = useState(false);
   const [aviso, setAviso] = useState<{ texto: string; error?: boolean }>();
   const [seleccion, setSeleccion] = useState<string>();
+  const [resaltar, setResaltar] = useState(false);
 
   useEffect(() => {
     try {
@@ -114,6 +144,23 @@ function Sala({ cambioExterno }: { cambioExterno: number }) {
     }
   }, [clave]);
 
+  // Órdenes del modo presentación que tocan a la sala.
+  useEffect(() => {
+    if (!orden) return;
+    const m = orden.momento;
+    if (m.tipo === "reiniciar") {
+      setSeleccion(undefined);
+      setAviso(undefined);
+      setResaltar(false);
+      accion({ accion: "reiniciar" });
+    } else if (m.tipo === "sin_reserva") accion({ accion: "sin_reserva", nombre: m.nombre, personas: m.personas });
+    else if (m.tipo === "avanzar_reloj") accion({ accion: "avanzar_reloj", minutos: m.minutos });
+    else if (m.tipo === "enfocar_mesa") setSeleccion(m.mesaId);
+    else if (m.tipo === "resaltar_metricas") setResaltar(true);
+    // Solo reacciona a una orden nueva.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orden?.n]);
+
   if (pideClave) return <PedirClave alEnviar={(c) => { try { sessionStorage.setItem("mesa-clave", c); } catch {} setClave(c); }} />;
   if (!vista) return <p className="p-6 text-lino/75">Cargando la sala…</p>;
 
@@ -121,7 +168,7 @@ function Sala({ cambioExterno }: { cambioExterno: number }) {
 
   return (
     <div className="space-y-5">
-      <Cabecera vista={vista} accion={accion} alReiniciar={() => { setSeleccion(undefined); setAviso(undefined); }} />
+      <Cabecera vista={vista} accion={accion} resaltar={resaltar} alPresentar={alPresentar} alReiniciar={() => { setSeleccion(undefined); setAviso(undefined); setResaltar(false); }} />
 
       {aviso && (
         <p role="status" className={`rounded-lg border-l-4 px-4 py-2.5 text-sm ${aviso.error ? "border-vino-vivo bg-vino/40 text-lino" : "border-laton bg-noche-2 text-lino"}`}>
@@ -145,7 +192,7 @@ function Sala({ cambioExterno }: { cambioExterno: number }) {
   );
 }
 
-function Cabecera({ vista, accion, alReiniciar }: { vista: VistaSala; accion: Accion; alReiniciar: () => void }) {
+function Cabecera({ vista, accion, alReiniciar, alPresentar, resaltar }: { vista: VistaSala; accion: Accion; alReiniciar: () => void; alPresentar?: () => void; resaltar: boolean }) {
   const m = vista.metricas;
   return (
     <header className="flex flex-wrap items-end gap-x-8 gap-y-4 border-b border-noche-3 pb-5">
@@ -169,22 +216,28 @@ function Cabecera({ vista, accion, alReiniciar }: { vista: VistaSala; accion: Ac
             </button>
           </div>
         )}
+        {vista.demo && alPresentar && (
+          <button onClick={alPresentar} className="self-stretch rounded-md border-2 border-laton px-4 text-sm font-bold text-laton hover:bg-laton hover:text-tinta">
+            Ver la demo
+            <span className="block text-xs font-normal">60 segundos</span>
+          </button>
+        )}
       </div>
 
       <dl className="grid w-full grid-cols-3 gap-x-5 gap-y-3 sm:grid-cols-5" aria-label="Resumen del servicio">
         <Dato titulo="personas en mesa" valor={m.sentadosAhora} extra={`${m.ocupacionPct} % de las plazas`} />
         <Dato titulo="reservas hoy" valor={m.reservasHoy} extra={`${m.comensalesPrevistos} personas`} />
         <Dato titulo="en espera" valor={m.enEspera} />
-        <Dato titulo="no llegaron" valor={m.ausencias} />
-        <Dato titulo="sentados desde la espera" valor={m.rescatadosDeEspera} />
+        <Dato titulo="no llegaron" valor={m.ausencias} resaltar={resaltar} />
+        <Dato titulo="sentados desde la espera" valor={m.rescatadosDeEspera} resaltar={resaltar} />
       </dl>
     </header>
   );
 }
 
-function Dato({ titulo, valor, extra }: { titulo: string; valor: number; extra?: string }) {
+function Dato({ titulo, valor, extra, resaltar }: { titulo: string; valor: number; extra?: string; resaltar?: boolean }) {
   return (
-    <div className="flex flex-col-reverse">
+    <div className={`flex flex-col-reverse ${resaltar ? "-mx-2 rounded-md px-2 outline-2 outline-laton [&_dd]:text-laton" : ""}`}>
       <dt className="text-xs leading-snug text-lino/75">
         {titulo}
         {extra && <span className="block text-lino/60">{extra}</span>}
@@ -451,7 +504,7 @@ function LibroReservas({ vista, accion }: { vista: VistaSala; accion: Accion }) 
 // Vista del cliente: un teléfono con la reserva en línea
 // ---------------------------------------------------------------------------
 
-function ReservaCliente({ cambio, alReservar }: { cambio: number; alReservar: () => void }) {
+function ReservaCliente({ cambio, alReservar, orden }: { cambio: number; alReservar: () => void; orden?: OrdenGuion }) {
   const [personas, setPersonas] = useState(2);
   const [fecha, setFecha] = useState<string>();
   const [hora, setHora] = useState<string>();
@@ -475,8 +528,35 @@ function ReservaCliente({ cambio, alReservar }: { cambio: number; alReservar: ()
 
   useEffect(() => setHora(undefined), [personas, fecha]);
 
+  // Modo presentación: el teléfono se rellena solo y reserva.
+  const horaPendiente = useRef<string>(undefined);
+  useEffect(() => {
+    if (!orden || !disp) return;
+    const m = orden.momento;
+    if (m.tipo === "rellenar_reserva") {
+      setReserva(undefined);
+      setPersonas(RESERVA_GUION.personas);
+      setFecha(disp.ahora.fecha);
+      horaPendiente.current = RESERVA_GUION.hora;
+      if (disp.fecha === disp.ahora.fecha && personas === RESERVA_GUION.personas) setHora(RESERVA_GUION.hora);
+      return escribir([[setNombre, RESERVA_GUION.nombre], [setTelefono, RESERVA_GUION.telefono]]);
+    }
+    if (m.tipo === "enviar_reserva") void reservar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orden?.n]);
+  useEffect(() => {
+    if (horaPendiente.current && disp?.horas.some((h) => h.hora === horaPendiente.current) && disp.fecha === fecha) {
+      setHora(horaPendiente.current);
+      horaPendiente.current = undefined;
+    }
+  }, [disp, fecha]);
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    await reservar();
+  }
+
+  async function reservar() {
     if (!fecha || !hora) return;
     setEnviando(true);
     setError(undefined);
@@ -625,6 +705,26 @@ function ReservaCliente({ cambio, alReservar }: { cambio: number; alReservar: ()
       </div>
     </div>
   );
+}
+
+/** Escribe los textos letra a letra (o de golpe con movimiento reducido). Devuelve la limpieza. */
+function escribir(campos: [(v: string) => void, string][]): () => void {
+  const reducido = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducido) {
+    campos.forEach(([set, v]) => set(v));
+    return () => {};
+  }
+  let campo = 0;
+  let letra = 0;
+  campos.forEach(([set]) => set(""));
+  const t = setInterval(() => {
+    if (campo >= campos.length) return clearInterval(t);
+    const [set, valor] = campos[campo];
+    letra += 1;
+    set(valor.slice(0, letra));
+    if (letra >= valor.length) { campo += 1; letra = 0; }
+  }, 55);
+  return () => clearInterval(t);
 }
 
 function PedirClave({ alEnviar }: { alEnviar: (c: string) => void }) {

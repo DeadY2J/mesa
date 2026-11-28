@@ -2,6 +2,14 @@
 
 Actualizado: 27/11/2026.
 
+## Modo presentación (28/11/2026)
+- Botón "Ver la demo" en la cabecera (solo en modo demo): reinicia la sala y ejecuta solo el guion de 60 s de
+  PROSPECCION.md con subtítulos grandes para grabar el vídeo: el teléfono se rellena y reserva para 2 a las 21:15,
+  llega un grupo de 4 sin reserva (espera estimada 70 min), +15 min, Daniel Ruiz no llegó y el grupo pasa a la mesa 4,
+  y se resaltan las métricas. Botones Repetir, Reiniciar demo y Salir. En móvil cambia sola de pestaña.
+- El guion vive en `src/mesa/guion.ts` (puro) con tests: cubre 0–60 s, la voz coincide con PROSPECCION.md y el motor
+  cumple el guion con los datos de la demo. 65 tests en verde.
+
 ## Rediseño visual del 28/11/2026
 - Identidad propia: un comedor de noche visto desde arriba. Fondo vino oscuro, manteles de lino, mesas libres en oliva,
   ocupadas en vino y las que esperan a sus clientes en latón. Tipografías Young Serif (rótulos, horas y números de mesa)
