@@ -51,6 +51,8 @@ export function vistaSala(estado: Estado, cfg: ConfigRestaurante, demo: boolean)
       estado: estadoMesa,
       detalle,
       reservaId: reserva?.id,
+      /** Sillas que ocupa (o va a ocupar) la reserva en ESTA mesa; en mesas unidas se reparte en orden. */
+      sillasOcupadas: reserva ? sillasEnMesa(reserva, m.id, cfg) : 0,
       proxima: proxima ? `${proxima.hora} · ${proxima.personas}` : undefined,
     };
   });
@@ -86,6 +88,18 @@ export function vistaSala(estado: Estado, cfg: ConfigRestaurante, demo: boolean)
 }
 
 export type VistaSala = ReturnType<typeof vistaSala>;
+
+/** Reparte las personas de una reserva entre sus mesas, en el orden en que se unieron. */
+export function sillasEnMesa(r: Reserva, mesaId: string, cfg: ConfigRestaurante): number {
+  let quedan = r.personas;
+  for (const id of r.mesaIds) {
+    const cap = cfg.mesas.find((x) => x.id === id)?.capacidad ?? 0;
+    const aqui = Math.min(cap, quedan);
+    if (id === mesaId) return aqui;
+    quedan -= aqui;
+  }
+  return 0;
+}
 
 /** Días que se ofrecen en el selector de la reserva en línea (los cerrados salen marcados). */
 export function diasReservables(estado: Estado, cfg: ConfigRestaurante, cuantos = 14) {

@@ -30,7 +30,7 @@ un solo seguimiento a los 5 días como máximo; respetar a quien diga que no y a
 ## Guion de demo de 60 segundos
 | Tiempo | Imagen | Voz |
 |---|---|---|
-| 0–8 s | Plano del salón casi lleno, viernes 20:00 | "Viernes en la noche. Así ve tu personal el salón en tiempo real." |
+| 0–8 s | Plano del salón casi lleno, 20:00 | "Hoy en la noche. Así ve tu personal el salón en tiempo real." |
 | 8–22 s | Móvil: reserva para 2 a las 21:15 | "Tu cliente reserva desde el teléfono. Solo ve horas con mesa libre de verdad." |
 | 22–30 s | La mesa se enciende en el plano | "La mesa se asigna sola: nunca dos reservas en la misma mesa." |
 | 30–40 s | Llegan 4 sin reserva → "Espera estimada: 70 min" | "Llega un grupo sin reserva. En lugar de 'no sé', les das un tiempo de espera." |
